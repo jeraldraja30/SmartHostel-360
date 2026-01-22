@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warden Inbox | Hostel Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/notifications.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .inbox-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .notification-item {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .notification-item:hover {
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+        .notification-item.unread {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        .notification-item.unread::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #2196f3;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+        .notification-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .type-payment { background: #c8e6c9; color: #2e7d32; }
+        .type-outpass { background: #fff3e0; color: #e65100; }
+        .type-attendance { background: #e1bee7; color: #4a148c; }
+        .badge {
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="inbox-container">
+        <div class="inbox-header">
+            <h1><i class="fas fa-inbox"></i> Warden Inbox</h1>
+            <div>
+                <span id="unread-count" class="badge">0</span>
+                <span>Unread Notifications</span>
+            </div>
+        </div>
+        
+        <div id="notifications-list">
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+                <p>Loading notifications...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../utils/storage.js"></script>
+    <script src="warden_inbox.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+        });
+        
+        function loadNotifications() {
+            if (window.WardenInbox) {
+                window.WardenInbox.renderNotifications();
+            }
+        }
+    </script>
+</body>
+</html>
+

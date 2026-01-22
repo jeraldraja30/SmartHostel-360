@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification & Testing | Hostel Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { margin-bottom: 30px; color: #333; }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn-test {
+            background: #667eea;
+            color: white;
+        }
+        .btn-test:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status-icon {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-vial"></i> System Verification & Testing</h1>
+        
+        <div class="test-section">
+            <h2>1. Attendance System Tests</h2>
+            <div class="test-item">
+                <h3>Test Attendance Logic</h3>
+                <button class="btn btn-test" onclick="testAttendanceLogic()">Run Test</button>
+                <div id="attendance-result" class="result"></div>
+            </div>
+            <div class="test-item">
+                <h3>Test Extract Leave</h3>
+                <button class="btn btn-test" onclick="testExtractLeave()">Run Test</button>
+                <div id="extract-leave-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Outpass System Tests</h2>
+            <div class="test-item">
+                <h3>Test Outpass Creation</h3>
+                <button class="btn btn-test" onclick="testOutpassCreation()">Run Test</button>
+                <div id="outpass-create-result" class="result"></div>
+            </div>
+            <div class="test-item">
+                <h3>Test Receipt Generation</h3>
+                <button class="btn btn-test" onclick="testReceiptGeneration()">Run Test</button>
+                <div id="receipt-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Payment System Tests</h2>
+            <div class="test-item">
+                <h3>Test UPI Payment</h3>
+                <button class="btn btn-test" onclick="testUPIPayment()">Run Test</button>
+                <div id="upi-result" class="result"></div>
+            </div>
+            <div class="test-item">
+                <h3>Test Card Payment (Masked)</h3>
+                <button class="btn btn-test" onclick="testCardPayment()">Run Test</button>
+                <div id="card-result" class="result"></div>
+            </div>
+            <div class="test-item">
+                <h3>Test Cash Payment</h3>
+                <button class="btn btn-test" onclick="testCashPayment()">Run Test</button>
+                <div id="cash-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Room Booking Tests</h2>
+            <div class="test-item">
+                <h3>Test Room Allocation</h3>
+                <button class="btn btn-test" onclick="testRoomAllocation()">Run Test</button>
+                <div id="room-alloc-result" class="result"></div>
+            </div>
+            <div class="test-item">
+                <h3>Test Availability Update</h3>
+                <button class="btn btn-test" onclick="testAvailabilityUpdate()">Run Test</button>
+                <div id="availability-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Complaint System Tests</h2>
+            <div class="test-item">
+                <h3>Test Anonymous Submission</h3>
+                <button class="btn btn-test" onclick="testAnonymousComplaint()">Run Test</button>
+                <div id="complaint-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>6. CSV Export Tests</h2>
+            <div class="test-item">
+                <h3>Test CSV Export</h3>
+                <button class="btn btn-test" onclick="testCSVExport()">Run Test</button>
+                <div id="csv-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>7. Notification System Tests</h2>
+            <div class="test-item">
+                <h3>Test Warden Notifications</h3>
+                <button class="btn btn-test" onclick="testWardenNotifications()">Run Test</button>
+                <div id="notification-result" class="result"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>8. Run All Tests</h2>
+            <button class="btn btn-test" onclick="runAllTests()" style="padding: 15px 30px; font-size: 16px;">
+                <i class="fas fa-play"></i> Run All Tests
+            </button>
+            <div id="all-tests-result" class="result"></div>
+        </div>
+    </div>
+
+    <script src="../utils/storage.js"></script>
+    <script src="../js/data-init.js"></script>
+    <script src="outpass.js"></script>
+    <script src="payments.js"></script>
+    <script src="complaint.js"></script>
+    <script src="verify.js"></script>
+</body>
+</html>
+

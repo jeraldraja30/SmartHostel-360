@@ -1,0 +1,399 @@
+/**
+ * Notification System Styles
+ * Blue theme for Warden, Green theme for Student
+ */
+
+/* ===== Container Styles ===== */
+.notifications-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.notifications-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.notifications-header h1 {
+    font-size: 28px;
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.notifications-header p {
+    color: #666;
+    margin: 0;
+}
+
+/* ===== Warden Theme (Blue) ===== */
+.warden-notifications-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.warden-notifications-page .notifications-page {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transform-style: preserve-3d;
+    animation: slideUp3D 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    perspective: 1000px;
+}
+
+@keyframes slideUp3D {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) translateZ(-100px) rotateX(-10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+    }
+}
+
+.warden-notifications-page .notifications-header h1 {
+    color: #667eea;
+}
+
+/* ===== Student Theme (Green) ===== */
+.student-notifications-page {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.student-notifications-page .notifications-page {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transform-style: preserve-3d;
+    animation: slideUp3D 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    perspective: 1000px;
+}
+
+.student-notifications-page .notifications-header h1 {
+    color: #11998e;
+}
+
+/* ===== Send Notification Form (Warden Only) ===== */
+.notification-form {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border: 2px solid #e0e0e0;
+}
+
+.notification-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.notification-form textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.notification-form textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.notification-form .btn-send {
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-form .btn-send::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateZ(-10px) scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+}
+
+.notification-form .btn-send:hover {
+    transform: translateY(-3px) translateZ(5px) rotateX(5deg);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5),
+                0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.notification-form .btn-send:hover::before {
+    transform: translateZ(0) scaleX(1);
+}
+
+.notification-form .btn-send:active {
+    transform: translateY(-1px) translateZ(2px);
+    transition: transform 0.1s;
+}
+
+/* ===== Notification Cards with 3D Effects ===== */
+.notification-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s;
+}
+
+.notification-card:hover::before {
+    left: 100%;
+}
+
+.notification-card:hover {
+    transform: translateY(-10px) translateZ(20px) rotateX(2deg) rotateY(2deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Warden Card - Blue theme */
+.notification-card.warden-card {
+    border-left-color: #667eea;
+}
+
+.notification-card.warden-card .notification-header h3 {
+    color: #667eea;
+}
+
+/* Student Card - Green theme */
+.notification-card.student-card {
+    border-left-color: #11998e;
+}
+
+.notification-card.student-card .notification-header h3 {
+    color: #11998e;
+}
+
+/* ===== Notification Card Content ===== */
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-header h3 i {
+    font-size: 20px;
+}
+
+.notification-message {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.notification-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.notification-date {
+    color: #888;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-date i {
+    font-size: 12px;
+}
+
+/* ===== Delete Button (Warden Only) ===== */
+.btn-delete {
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-delete:hover {
+    background: #ff3838;
+    transform: scale(1.05);
+}
+
+.btn-delete:active {
+    transform: scale(0.95);
+}
+
+.btn-delete i {
+    font-size: 12px;
+}
+
+/* ===== Empty State ===== */
+.notification-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.notification-empty i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.notification-empty p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ===== Enhanced 3D Fade-in Animation ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) translateZ(-50px) rotateX(-10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+/* Stagger animation for multiple cards */
+.notification-card:nth-child(1) { animation-delay: 0.05s; }
+.notification-card:nth-child(2) { animation-delay: 0.1s; }
+.notification-card:nth-child(3) { animation-delay: 0.15s; }
+.notification-card:nth-child(4) { animation-delay: 0.2s; }
+.notification-card:nth-child(5) { animation-delay: 0.25s; }
+.notification-card:nth-child(n+6) { animation-delay: 0.3s; }
+
+/* ===== Notification Badge in Navbar ===== */
+.notification-badge {
+    display: inline-block;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 20px;
+    margin-left: 6px;
+    animation: pulse3D 2s infinite;
+    transform-style: preserve-3d;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+}
+
+@keyframes pulse3D {
+    0%, 100% {
+        transform: scale(1) translateZ(0) rotateY(0deg);
+        box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+    }
+    50% {
+        transform: scale(1.2) translateZ(10px) rotateY(180deg);
+        box-shadow: 0 4px 16px rgba(255, 71, 87, 0.6);
+    }
+}
+
+/* Ensure badge is visible in navbar */
+nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .notifications-page {
+        padding: 20px 15px;
+    }
+    
+    .notification-card {
+        padding: 15px;
+    }
+    
+    .notification-form {
+        padding: 20px;
+    }
+    
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .btn-delete {
+        align-self: flex-end;
+    }
+}
+

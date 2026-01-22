@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Warden | Hostel Admin Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/notifications.css">
+    <style>
+        /* Basic page reset and styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="warden-notifications-page">
+    <div class="notifications-page">
+        <!-- Back Button -->
+        <div style="margin-bottom: 20px;">
+            <button onclick="goBackToDashboard()" class="btn-back" style="background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </div>
+        
+        <!-- Page Header -->
+        <div class="notifications-header">
+            <h1><i class="fas fa-bell"></i> Notification Management</h1>
+            <p>Send notifications to all students. You can view and delete existing notifications.</p>
+        </div>
+
+        <!-- Send Notification Form -->
+        <div class="notification-form">
+            <label for="notification-message-input">
+                <i class="fas fa-comment-dots"></i> New Notification Message
+            </label>
+            <textarea 
+                id="notification-message-input" 
+                placeholder="Enter your notification message here... (e.g., Hostel gate will close at 9:00 PM today)"
+                rows="4"
+            ></textarea>
+            <button class="btn-send" onclick="handleSendNotification()">
+                <i class="fas fa-paper-plane"></i> Send Notification
+            </button>
+        </div>
+
+        <!-- Existing Notifications List -->
+        <div class="notifications-list">
+            <h2 style="margin-bottom: 20px; color: #333;">
+                <i class="fas fa-list"></i> All Notifications
+            </h2>
+            <div id="warden-notifications-container">
+                <!-- Notifications will be rendered here by JavaScript -->
+                <div style="text-align: center; padding: 40px; color: #999;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 24px;"></i>
+                    <p>Loading notifications...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/notifications.js"></script>
+    <script>
+        // Function to go back to dashboard
+        function goBackToDashboard() {
+            // Check if we're in the main app context (embedded page)
+            if (typeof window.showPage === 'function') {
+                window.showPage('warden-dashboard');
+            } else {
+                // If standalone page, redirect to index with hash for navigation
+                window.location.href = '../index.html#warden-dashboard';
+            }
+        }
+        
+        // Initialize page when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize demo notifications if needed
+            initializeDemoNotifications();
+            
+            // Render notifications
+            renderWardenView();
+            
+            // Allow Enter key to send (Ctrl+Enter or Shift+Enter)
+            const textarea = document.getElementById('notification-message-input');
+            if (textarea) {
+                textarea.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
+                        e.preventDefault();
+                        handleSendNotification();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
