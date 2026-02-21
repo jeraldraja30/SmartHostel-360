@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 🏢 SMART HOSTEL 360 — Management System
 
