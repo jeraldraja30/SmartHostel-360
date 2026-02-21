@@ -1,4 +1,4 @@
-const API_BASE_URL = window.API_BASE_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 let backendAvailable = false;
 const DEFAULT_ROOM_IMAGE = "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1758&q=80";
 const persistHostelDataSafe = () => {
