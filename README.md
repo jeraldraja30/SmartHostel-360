@@ -1260,4 +1260,4 @@ This project is licensed under the terms specified by the project owner. See `LI
 Made with HTML5 • CSS3 • JavaScript • Django • MySQL
 
 </div>
-]]>
+
