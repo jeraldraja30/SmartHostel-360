@@ -1,0 +1,2984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warden Dashboard — SmartHostel 360</title>
+  <meta name="description" content="SmartHostel 360 Warden & Admin Control Panel — manage students, rooms, beds, outpasses and payments." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       DESIGN TOKENS
+    ═══════════════════════════════════════════════════════════ */
+    :root {
+      --bg:          #0f1117;
+      --surface:     #16181f;
+      --surface2:    #1e2130;
+      --border:      rgba(255,255,255,0.07);
+      --accent:      #6c63ff;
+      --accent2:     #48cfad;
+      --warning:     #f6c90e;
+      --danger:      #ff5c72;
+      --text:        #e8eaf0;
+      --text-muted:  #8b90a7;
+      --sidebar-w:   260px;
+      --header-h:    64px;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --shadow:      0 4px 24px rgba(0,0,0,0.35);
+      --transition:  0.22s cubic-bezier(0.4,0,0.2,1);
+      --admin-gold:  #f6c90e;
+      --warden-blue: #48cfad;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    button { cursor: pointer; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 200;
+      transition: transform var(--transition);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .logo-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: grid; place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(108,99,255,0.4);
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+      cursor: pointer;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item i { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .nav-item:hover {
+      background: rgba(108,99,255,0.1);
+      color: var(--text);
+      border-color: rgba(108,99,255,0.2);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(108,99,255,0.25), rgba(108,99,255,0.08));
+      color: #a78bfa;
+      border-color: rgba(108,99,255,0.35);
+    }
+
+    .nav-item .badge {
+      margin-left: auto;
+      background: var(--danger);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .admin-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .admin-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: grid; place-items: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .admin-info { flex: 1; min-width: 0; }
+
+    .admin-name {
+      font-size: 13px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .admin-role {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    .logout-btn {
+      background: none; border: none;
+      color: var(--text-muted);
+      padding: 6px;
+      border-radius: 6px;
+      transition: all var(--transition);
+    }
+
+    .logout-btn:hover { color: var(--danger); background: rgba(255,92,114,0.1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       MAIN LAYOUT
+    ═══════════════════════════════════════════════════════════ */
+    .main-wrapper {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: calc(100vw - var(--sidebar-w));
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════════════════════════ */
+    .topbar {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .page-breadcrumb {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-btn {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: grid; place-items: center;
+      transition: all var(--transition);
+      position: relative;
+    }
+
+    .topbar-btn:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(108,99,255,0.1);
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 1.5px solid var(--surface);
+    }
+
+    .hamburger {
+      display: none;
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      place-items: center;
+      transition: all var(--transition);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CONTENT AREA
+    ═══════════════════════════════════════════════════════════ */
+    .content {
+      flex: 1;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       PAGES (TAB SYSTEM)
+    ═══════════════════════════════════════════════════════════ */
+    .page-section { display: none; flex-direction: column; gap: 24px; }
+    .page-section.active { display: flex; animation: fadeUp 0.35s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i { color: var(--accent); }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       STAT CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all var(--transition);
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--card-color, var(--accent)), transparent 70%);
+      opacity: 0.05;
+      pointer-events: none;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(108,99,255,0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    }
+
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .stat-body { flex: 1; }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .stat-change {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    .stat-change.up   { background: rgba(72,207,173,0.15); color: var(--accent2); }
+    .stat-change.down { background: rgba(255,92,114,0.15);  color: var(--danger); }
+
+    /* ═══════════════════════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════════════════════ */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead th {
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 13px 16px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+    tbody td {
+      padding: 13px 16px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .td-id {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(108,99,255,0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       BADGES
+    ═══════════════════════════════════════════════════════════ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-green  { background: rgba(72,207,173,0.15); color: var(--accent2); }
+    .badge-red    { background: rgba(255,92,114,0.15);  color: var(--danger); }
+    .badge-yellow { background: rgba(246,201,14,0.15); color: var(--warning); }
+    .badge-purple { background: rgba(108,99,255,0.15); color: #a78bfa; }
+    .badge-grey   { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 600;
+      border: none;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white;
+      box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(108,99,255,0.45);
+      filter: brightness(1.1);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #2dd4bf, var(--accent2));
+      color: #003029;
+      box-shadow: 0 4px 14px rgba(72,207,173,0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.08);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff5c72, #ff4060);
+      color: white;
+      box-shadow: 0 4px 14px rgba(255,92,114,0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+    .btn-icon {
+      width: 32px; height: 32px;
+      padding: 0;
+      display: grid; place-items: center;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       FORM ELEMENTS
+    ═══════════════════════════════════════════════════════════ */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 14px;
+      transition: all var(--transition);
+      width: 100%;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+    }
+
+    .form-control::placeholder { color: var(--text-muted); }
+
+    select.form-control option { background: var(--surface2); }
+
+    .form-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    .section-label {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(108,99,255,0.2);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SEARCH BAR
+    ═══════════════════════════════════════════════════════════ */
+    .search-bar {
+      position: relative;
+      flex: 1;
+      max-width: 320px;
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .search-bar input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 9px 14px 9px 36px;
+      font-size: 13.5px;
+      width: 100%;
+      transition: all var(--transition);
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ROOM GRID
+    ═══════════════════════════════════════════════════════════ */
+    .floor-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .floor-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+
+    .room-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: all var(--transition);
+      cursor: default;
+    }
+
+    .room-card:hover {
+      border-color: rgba(108,99,255,0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .room-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .room-num {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .beds-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .bed-slot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .bed-slot.free {
+      background: rgba(72,207,173,0.08);
+      border: 1px solid rgba(72,207,173,0.2);
+      color: var(--accent2);
+    }
+
+    .bed-slot.occupied {
+      background: rgba(255,92,114,0.08);
+      border: 1px solid rgba(255,92,114,0.2);
+      color: var(--danger);
+    }
+
+    .bed-label { display: flex; align-items: center; gap: 5px; }
+
+    .bed-student {
+      font-size: 11px;
+      opacity: 0.8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(24px) scale(0.96);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-title i {
+      color: var(--accent);
+      font-size: 20px;
+    }
+
+    .modal-close {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: grid; place-items: center;
+      font-size: 15px;
+      transition: all var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(255,92,114,0.1);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════════════════ */
+    #toast-container {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13.5px;
+      font-weight: 500;
+      min-width: 260px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      animation: slideInToast 0.3s ease, fadeOutToast 0.4s ease 3.2s forwards;
+      pointer-events: all;
+    }
+
+    .toast-icon { font-size: 18px; flex-shrink: 0; }
+    .toast-icon.success { color: var(--accent2); }
+    .toast-icon.error   { color: var(--danger); }
+    .toast-icon.warn    { color: var(--warning); }
+
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeOutToast {
+      to { opacity: 0; transform: translateX(40px); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ACTIVITY FEED
+    ═══════════════════════════════════════════════════════════ */
+    .activity-list { display: flex; flex-direction: column; }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .activity-dot.green { background: var(--accent2); }
+    .activity-dot.red   { background: var(--danger); }
+    .activity-dot.yellow { background: var(--warning); }
+
+    .activity-text { flex: 1; font-size: 13.5px; }
+    .activity-time { font-size: 11px; color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 52px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      opacity: 0.3;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SPINNER
+    ═══════════════════════════════════════════════════════════ */
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2.5px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════════════════
+       CONFIRMATION CHIP (Delete flow)
+    ═══════════════════════════════════════════════════════════ */
+    .confirm-info {
+      background: rgba(255,92,114,0.08);
+      border: 1px solid rgba(255,92,114,0.2);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-size: 13.5px;
+      margin-bottom: 4px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* ═══════════════════════════════════════════════════════════
+       LOGIN SCREEN
+    ═══════════════════════════════════════════════════════════ */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(108,99,255,0.18) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 20%, rgba(72,207,173,0.12) 0%, transparent 50%),
+                  var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      transition: opacity 0.4s ease;
+    }
+
+    #login-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .login-brand .brand-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      display: grid; place-items: center;
+      font-size: 22px;
+      box-shadow: 0 6px 16px rgba(108,99,255,0.45);
+    }
+
+    .login-brand .brand-name { font-size: 18px; font-weight: 800; }
+    .login-brand .brand-sub  { font-size: 12px; color: var(--text-muted); }
+
+    .login-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+
+    .login-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+
+    .login-form { display: flex; flex-direction: column; gap: 16px; }
+
+    .input-group { position: relative; }
+
+    .input-group i.input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .input-group .form-control { padding-left: 42px; }
+
+    .input-group .toggle-pass {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      transition: color var(--transition);
+    }
+
+    .input-group .toggle-pass:hover { color: var(--text); }
+
+    .login-error {
+      background: rgba(255,92,114,0.1);
+      border: 1px solid rgba(255,92,114,0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+    }
+
+    .login-btn {
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white;
+      border: none;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 18px rgba(108,99,255,0.35);
+    }
+
+    .login-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(108,99,255,0.45);
+    }
+
+    .login-footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .login-footer a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateX(0);
+        box-shadow: 8px 0 40px rgba(0,0,0,0.4);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+        max-width: 100vw;
+      }
+
+      .hamburger { display: grid; }
+
+      .content { padding: 18px; }
+
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+
+      .form-grid { grid-template-columns: 1fr; }
+
+      .form-group.full { grid-column: 1; }
+    }
+
+    @media (max-width: 540px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .rooms-grid { grid-template-columns: 1fr; }
+      .login-box { padding: 28px 20px; }
+    }
+    /* ═══════════════════════════════════════════════════════════
+       ROLE-BASED ACCESS CONTROL STYLES
+    ═══════════════════════════════════════════════════════════ */
+    /* Admin-only elements are hidden until JS confirms admin role */
+    .admin-only { display: none !important; }
+    body.is-admin .admin-only { display: flex !important; }
+    body.is-admin .admin-only-block { display: block !important; }
+    .admin-only-block { display: none !important; }
+    body.is-admin .admin-only-inline { display: inline-flex !important; }
+    .admin-only-inline { display: none !important; }
+
+    /* Role badge chip */
+    .role-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .role-chip.admin  { background: rgba(246,201,14,0.18); color: #f6c90e; border: 1px solid rgba(246,201,14,0.3); }
+    .role-chip.warden { background: rgba(72,207,173,0.15); color: #48cfad; border: 1px solid rgba(72,207,173,0.25); }
+
+    /* Panel toggle in sidebar */
+    .panel-toggle {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      margin: 8px 0;
+    }
+
+    .panel-tab {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      transition: all var(--transition);
+    }
+
+    .panel-tab.active {
+      background: linear-gradient(135deg, var(--accent), #8b7cf8);
+      color: white;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.3);
+    }
+
+    .panel-tab.admin-tab.active {
+      background: linear-gradient(135deg, #f6c90e, #f59e0b);
+      color: #1a1000;
+    }
+
+    .nav-separator {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    /* Admin panel section (hidden by default) */
+    .admin-nav-section { display: none; }
+    body.is-admin .admin-nav-section { display: block; }
+
+    /* Warden restricted notice */
+    .warden-notice {
+      background: rgba(72,207,173,0.08);
+      border: 1px solid rgba(72,207,173,0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    body.is-admin .warden-notice { display: none; }
+
+    /* Admin banner on dashboard */
+    .admin-welcome-banner {
+      background: linear-gradient(135deg, rgba(246,201,14,0.12), rgba(245,158,11,0.08));
+      border: 1px solid rgba(246,201,14,0.25);
+      border-radius: var(--radius);
+      padding: 16px 22px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+    }
+
+    body.is-admin .admin-welcome-banner { display: flex; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">
+      <div class="brand-icon">🏨</div>
+      <div>
+        <div class="brand-name">SmartHostel 360</div>
+        <div class="brand-sub">Warden &amp; Admin Control Panel</div>
+      </div>
+    </div>
+
+    <h1 class="login-title">Welcome back 👋</h1>
+    <p class="login-subtitle">Sign in as Warden or Admin</p>
+
+    <form class="login-form" id="login-form" novalidate>
+      <div class="input-group">
+        <i class="fa-solid fa-user input-icon"></i>
+        <input id="l-username" type="text" class="form-control" placeholder="Username" autocomplete="username" required />
+      </div>
+      <div class="input-group">
+        <i class="fa-solid fa-lock input-icon"></i>
+        <input id="l-password" type="password" class="form-control" placeholder="Password" autocomplete="current-password" required />
+        <button type="button" class="toggle-pass" onclick="togglePass()"><i class="fa-solid fa-eye" id="eye-icon"></i></button>
+      </div>
+      <div class="login-error" id="login-error"></div>
+      <button type="submit" class="login-btn" id="login-submit-btn">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In
+      </button>
+    </form>
+
+    <div class="login-footer">
+      Not staff? <a href="../index.html">Back to portal</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🏨</div>
+    <div>
+      <div class="logo-text">SmartHostel 360</div>
+      <div class="logo-sub" id="sidebar-panel-label">Warden Dashboard</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <!-- Panel Toggle — only shown to admin users via .admin-nav-section CSS -->
+    <div class="admin-nav-section" id="panel-toggle-wrap">
+      <div class="panel-toggle">
+        <button class="panel-tab active" id="tab-warden" onclick="switchPanel('warden')">&#128110; Warden</button>
+        <button class="panel-tab admin-tab" id="tab-admin" onclick="switchPanel('admin')">&#128081; Admin</button>
+      </div>
+    </div>
+
+    <!-- WARDEN PANEL -->
+    <div id="warden-panel">
+      <span class="nav-section-label">Overview</span>
+      <button class="nav-item active" onclick="showPage('dashboard', this)" id="nav-dashboard">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </button>
+
+      <span class="nav-section-label">Records</span>
+      <button class="nav-item" onclick="showPage('students', this)" id="nav-students">
+        <i class="fa-solid fa-users"></i> View Students
+      </button>
+      <button class="nav-item" onclick="showPage('rooms', this)" id="nav-rooms">
+        <i class="fa-solid fa-door-open"></i> Rooms &amp; Beds
+      </button>
+
+      <span class="nav-section-label">Operations</span>
+      <button class="nav-item" onclick="showPage('outpass', this)" id="nav-outpass">
+        <i class="fa-solid fa-file-signature"></i> Outpass Requests
+        <span class="badge" id="outpass-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-item" onclick="showPage('payments', this)" id="nav-payments">
+        <i class="fa-solid fa-indian-rupee-sign"></i> Payments
+      </button>
+    </div>
+
+    <!-- ADMIN PANEL (shown when admin switches to it) -->
+    <div id="admin-panel" style="display:none">
+      <span class="nav-section-label" style="color:#f6c90e">Admin Panel</span>
+      <button class="nav-item" onclick="showPage('dashboard', this)" id="nav-admin-dashboard">
+        <i class="fa-solid fa-gauge-high"></i> Dashboard
+      </button>
+      <button class="nav-item" onclick="showPage('students', this)" id="nav-admin-students">
+        <i class="fa-solid fa-users"></i> All Students
+      </button>
+      <button class="nav-item" onclick="showPage('add-student', this)" id="nav-add-student">
+        <i class="fa-solid fa-user-plus"></i> Add Student
+        <span class="role-chip admin" style="margin-left:auto">Admin</span>
+      </button>
+      <button class="nav-item" onclick="showPage('rooms', this)" id="nav-admin-rooms">
+        <i class="fa-solid fa-door-open"></i> Rooms &amp; Beds
+      </button>
+      <span class="nav-section-label" style="color:#f6c90e">Operations</span>
+      <button class="nav-item" onclick="showPage('outpass', this)" id="nav-admin-outpass">
+        <i class="fa-solid fa-file-signature"></i> Outpass Requests
+      </button>
+      <button class="nav-item" onclick="showPage('payments', this)" id="nav-admin-payments">
+        <i class="fa-solid fa-indian-rupee-sign"></i> Payments
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-chip">
+      <div class="admin-avatar" id="admin-avatar-initials">W</div>
+      <div class="admin-info">
+        <div class="admin-name" id="sidebar-admin-name">Admin</div>
+        <div class="admin-role" id="sidebar-role-label">Warden</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN WRAPPER
+══════════════════════════════════════════════════════ -->
+<div class="main-wrapper">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="topbar-left">
+        <div class="page-title" id="topbar-title">Dashboard</div>
+        <div class="page-breadcrumb" id="topbar-breadcrumb">Warden / Overview</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="refreshCurrentPage()" title="Refresh">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+      <button class="topbar-btn" title="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="topbar-btn" title="Back to Portal" onclick="window.location.href='../index.html'">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ══ PAGE: DASHBOARD ══════════════════════════════════ -->
+    <section class="page-section active" id="page-dashboard">
+      <!-- Admin Welcome Banner (admin only) -->
+      <div class="admin-welcome-banner" id="admin-banner">
+        <span style="font-size:24px">👑</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#f6c90e">Admin Mode Active</div>
+          <div style="font-size:12px;color:var(--text-muted)">You have full system access — Add/Delete students, manage rooms and more.</div>
+        </div>
+      </div>
+
+      <!-- Warden Notice -->
+      <div class="warden-notice">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>You are logged in as <strong>Warden</strong>. You can view records and manage outpass requests. Admin features are restricted.</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card" style="--card-color:#6c63ff">
+          <div class="stat-icon" style="background:rgba(108,99,255,0.15);color:#a78bfa">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-students">—</div>
+            <div class="stat-label">Total Students</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--card-color:#48cfad">
+          <div class="stat-icon" style="background:rgba(72,207,173,0.15);color:#48cfad">
+            <i class="fa-solid fa-bed"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-beds-free">—</div>
+            <div class="stat-label">Beds Available</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--card-color:#f6c90e">
+          <div class="stat-icon" style="background:rgba(246,201,14,0.15);color:#f6c90e">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-outpass-pending">—</div>
+            <div class="stat-label">Pending Outpasses</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--card-color:#ff5c72">
+          <div class="stat-icon" style="background:rgba(255,92,114,0.15);color:#ff5c72">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-revenue">—</div>
+            <div class="stat-label">Revenue (This Month)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-col: recent students + activity -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <!-- Recent Students -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-user-graduate"></i> Recent Students</div>
+              <div class="card-subtitle">Last 5 registrations</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('students', document.getElementById('nav-students'))">
+              View All
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th><th>Hosteler ID</th><th>Room</th>
+                </tr>
+              </thead>
+              <tbody id="recent-students-tbody">
+                <tr><td colspan="3"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-bolt"></i> Activity Feed</div>
+              <div class="card-subtitle">Latest system events</div>
+            </div>
+          </div>
+          <div class="activity-list" id="activity-feed">
+            <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Occupancy bar -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Bed Occupancy by Floor</div>
+            <div class="card-subtitle">2 floors · 10 rooms each · 3 beds per room</div>
+          </div>
+        </div>
+        <div id="occupancy-bars" style="display:flex;flex-direction:column;gap:16px;margin-top:4px">
+          <div style="color:var(--text-muted);font-size:13px">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: STUDENTS ═══════════════════════════════════ -->
+    <section class="page-section" id="page-students">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-users"></i> All Students</div>
+            <div class="card-subtitle" id="students-count-label">Loading…</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="student-search" placeholder="Search name, ID, email…" oninput="filterStudents()" />
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="exportStudentsCSV()" title="Export CSV">
+              <i class="fa-solid fa-file-csv"></i> Export
+            </button>
+            <!-- Add Student button — admin only -->
+            <button class="btn btn-primary btn-sm admin-only" onclick="showPage('add-student', document.getElementById('nav-add-student'))" style="display:none">
+              <i class="fa-solid fa-plus"></i> Add Student
+            </button>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Hosteler ID</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Room</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="8">
+                <div class="empty-state">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                  <p>Loading students…</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: ADD STUDENT ════════════════════════════════ -->
+    <section class="page-section" id="page-add-student">
+      <div class="card" style="max-width:680px">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-user-plus"></i> Create New Student</div>
+            <div class="card-subtitle">Hosteler ID is auto-generated from floor · room · bed</div>
+          </div>
+        </div>
+
+        <form id="add-student-form" novalidate>
+          <div class="form-grid">
+            <!-- Login credentials -->
+            <span class="section-label"><i class="fa-solid fa-key"></i> Login Credentials</span>
+
+            <div class="form-group">
+              <label for="as-username">Username *</label>
+              <input id="as-username" class="form-control" type="text" placeholder="e.g. raja_23" required />
+            </div>
+            <div class="form-group">
+              <label for="as-password">Password *</label>
+              <input id="as-password" class="form-control" type="password" placeholder="Min 6 characters" required />
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Student profile -->
+            <span class="section-label"><i class="fa-solid fa-id-card"></i> Student Profile</span>
+
+            <div class="form-group full">
+              <label for="as-fullname">Full Name *</label>
+              <input id="as-fullname" class="form-control" type="text" placeholder="e.g. Raja Jerald" required />
+            </div>
+            <div class="form-group">
+              <label for="as-email">Email *</label>
+              <input id="as-email" class="form-control" type="email" placeholder="raja@email.com" required />
+            </div>
+            <div class="form-group">
+              <label for="as-phone">Phone Number *</label>
+              <input id="as-phone" class="form-control" type="tel" placeholder="9876543210" maxlength="15" required />
+            </div>
+            <div class="form-group full">
+              <label for="as-address">Address</label>
+              <input id="as-address" class="form-control" type="text" placeholder="e.g. 12, Anna Nagar, Chennai" />
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Room assignment -->
+            <span class="section-label"><i class="fa-solid fa-door-open"></i> Room Assignment</span>
+
+            <div class="form-group">
+              <label for="as-floor">Floor *</label>
+              <select id="as-floor" class="form-control" onchange="updateRoomPreview()" required>
+                <option value="">Select Floor</option>
+                <option value="1">Floor 1</option>
+                <option value="2">Floor 2</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="as-room">Room (1–10) *</label>
+              <select id="as-room" class="form-control" onchange="updateRoomPreview()" required>
+                <option value="">Select Room</option>
+                <option value="1">Room 1</option>
+                <option value="2">Room 2</option>
+                <option value="3">Room 3</option>
+                <option value="4">Room 4</option>
+                <option value="5">Room 5</option>
+                <option value="6">Room 6</option>
+                <option value="7">Room 7</option>
+                <option value="8">Room 8</option>
+                <option value="9">Room 9</option>
+                <option value="10">Room 10</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label for="as-bed">Bed *</label>
+              <select id="as-bed" class="form-control" onchange="updateRoomPreview()" required>
+                <option value="">Select Bed</option>
+                <option value="1">Bed 1</option>
+                <option value="2">Bed 2</option>
+                <option value="3">Bed 3</option>
+              </select>
+            </div>
+
+            <!-- Preview chip -->
+            <div class="form-group full" id="hosteler-preview-wrap" style="display:none">
+              <label>Generated Hosteler ID</label>
+              <div style="background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.3);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:10px">
+                <i class="fa-solid fa-id-badge" style="color:var(--accent);font-size:18px"></i>
+                <span id="hosteler-id-preview" style="font-family:monospace;font-size:17px;font-weight:700;color:#a78bfa"></span>
+                <span style="font-size:12px;color:var(--text-muted);margin-left:4px">(auto-generated)</span>
+              </div>
+            </div>
+          </div><!-- /form-grid -->
+
+          <div style="display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+            <button type="submit" class="btn btn-primary" id="add-student-submit-btn">
+              <i class="fa-solid fa-user-plus"></i> Create Student
+            </button>
+            <button type="button" class="btn btn-ghost" onclick="resetAddStudentForm()">
+              <i class="fa-solid fa-xmark"></i> Reset
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Success card (hidden until creation) -->
+      <div class="card" id="add-student-success" style="display:none;max-width:680px;border-color:rgba(72,207,173,0.3)">
+        <div style="text-align:center;padding:10px 0 20px">
+          <div style="font-size:52px;margin-bottom:12px">🎉</div>
+          <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--accent2)">Student Created!</h2>
+          <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px">The student can now log in immediately.</p>
+          <div class="form-grid" style="max-width:420px;margin:0 auto;text-align:left">
+            <div class="form-group">
+              <label>Username</label>
+              <div class="form-control" id="success-username" style="background:var(--surface2);cursor:default"></div>
+            </div>
+            <div class="form-group">
+              <label>Hosteler ID</label>
+              <div class="form-control" id="success-hosteler-id" style="background:var(--surface2);cursor:default;font-family:monospace;color:#a78bfa"></div>
+            </div>
+            <div class="form-group">
+              <label>Full Name</label>
+              <div class="form-control" id="success-fullname" style="background:var(--surface2);cursor:default"></div>
+            </div>
+            <div class="form-group">
+              <label>Room</label>
+              <div class="form-control" id="success-room" style="background:var(--surface2);cursor:default"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;justify-content:center;margin-top:22px">
+            <button class="btn btn-primary" onclick="addAnother()"><i class="fa-solid fa-plus"></i> Add Another</button>
+            <button class="btn btn-ghost" onclick="showPage('students', document.getElementById('nav-students'))">View All Students</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: ROOMS ══════════════════════════════════════ -->
+    <section class="page-section" id="page-rooms">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-building"></i> Rooms & Beds</div>
+            <div class="card-subtitle">Floor 1 & 2 · 10 rooms each · 3 beds per room</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div id="rooms-summary" style="font-size:13px;color:var(--text-muted)">Loading…</div>
+          </div>
+        </div>
+
+        <div id="rooms-container">
+          <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading rooms…</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: OUTPASS ════════════════════════════════════ -->
+    <section class="page-section" id="page-outpass">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-file-signature"></i> Outpass Requests</div>
+            <div class="card-subtitle">Approve or reject student outpass applications</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select class="form-control" id="outpass-filter" onchange="filterOutpass()" style="width:140px;padding:8px 12px">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th><th>Hosteler ID</th><th>Reason</th><th>Exit</th><th>Return</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="outpass-tbody">
+              <tr><td colspan="7">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ PAGE: PAYMENTS ══════════════════════════════════ -->
+    <section class="page-section" id="page-payments">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-indian-rupee-sign"></i> Payment Records</div>
+            <div class="card-subtitle">All student fee transactions</div>
+          </div>
+          <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="payment-search" placeholder="Search student, ID…" oninput="filterPayments()" />
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th><th>Hosteler ID</th><th>Amount</th><th>Type</th><th>Date</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody">
+              <tr><td colspan="6">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════ -->
+
+<!-- Delete Student Modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Delete Student</div>
+      <button class="modal-close" onclick="closeModal('delete-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="confirm-info" id="delete-confirm-info"></div>
+    <p style="font-size:13.5px;color:var(--text-muted);margin-top:14px">
+      This will permanently remove the student account, Hosteler profile, and free up the bed assignment. <strong style="color:var(--danger)">This cannot be undone.</strong>
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
+      <button class="btn btn-danger" id="delete-confirm-btn" onclick="confirmDeleteStudent()">
+        <i class="fa-solid fa-trash"></i> Delete Permanently
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Update Room Modal -->
+<div class="modal-overlay" id="update-room-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Room Assignment</div>
+      <button class="modal-close" onclick="closeModal('update-room-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px">
+      Moving student: <strong id="update-room-student-name">—</strong>
+      <span style="font-family:monospace;color:#a78bfa" id="update-room-current-id"></span>
+    </p>
+    <form class="form-grid" id="update-room-form" novalidate>
+      <div class="form-group">
+        <label for="ur-floor">New Floor *</label>
+        <select id="ur-floor" class="form-control" onchange="updateRoomModalPreview()" required>
+          <option value="">Select Floor</option>
+          <option value="1">Floor 1</option>
+          <option value="2">Floor 2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ur-room">New Room *</label>
+        <select id="ur-room" class="form-control" onchange="updateRoomModalPreview()" required>
+          <option value="">Select Room</option>
+          <option value="1">Room 1</option><option value="2">Room 2</option><option value="3">Room 3</option>
+          <option value="4">Room 4</option><option value="5">Room 5</option><option value="6">Room 6</option>
+          <option value="7">Room 7</option><option value="8">Room 8</option><option value="9">Room 9</option>
+          <option value="10">Room 10</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ur-bed">New Bed *</label>
+        <select id="ur-bed" class="form-control" onchange="updateRoomModalPreview()" required>
+          <option value="">Select Bed</option>
+          <option value="1">Bed 1</option><option value="2">Bed 2</option><option value="3">Bed 3</option>
+        </select>
+      </div>
+      <div class="form-group" id="ur-preview-wrap" style="display:none">
+        <label>New Hosteler ID</label>
+        <div class="form-control" style="background:rgba(108,99,255,0.08);font-family:monospace;color:#a78bfa;cursor:default" id="ur-id-preview"></div>
+      </div>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('update-room-modal')">Cancel</button>
+      <button class="btn btn-primary" id="update-room-btn" onclick="submitUpdateRoom()">
+        <i class="fa-solid fa-right-left"></i> Move Student
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Outpass Approve/Reject Modal -->
+<div class="modal-overlay" id="outpass-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-file-signature"></i> Outpass Details</div>
+      <button class="modal-close" onclick="closeModal('outpass-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="outpass-modal-body" style="font-size:13.5px;line-height:1.8;display:flex;flex-direction:column;gap:6px"></div>
+    <div class="modal-actions" id="outpass-modal-actions"></div>
+  </div>
+</div>
+
+<!-- Student Detail Modal -->
+<div class="modal-overlay" id="student-detail-modal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-id-card"></i> Student Profile</div>
+      <button class="modal-close" onclick="closeModal('student-detail-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="student-detail-body" style="display:flex;flex-direction:column;gap:16px">
+      <!-- Filled by JS -->
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('student-detail-modal')">Close</button>
+      <button class="btn btn-primary" id="student-edit-toggle-btn" onclick="toggleStudentEdit()">
+        <i class="fa-solid fa-pen"></i> Edit
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal-overlay" id="edit-student-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Edit Student Details</div>
+      <button class="modal-close" onclick="closeModal('edit-student-modal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="edit-student-form" novalidate>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="es-username">Username</label>
+          <input id="es-username" class="form-control" type="text" readonly style="opacity:0.5;cursor:not-allowed" />
+        </div>
+        <div class="form-group">
+          <label for="es-hosteler-id">Hosteler ID</label>
+          <input id="es-hosteler-id" class="form-control" type="text" readonly style="opacity:0.5;cursor:not-allowed;font-family:monospace;color:#a78bfa" />
+        </div>
+        <div class="form-group full">
+          <label for="es-fullname">Full Name *</label>
+          <input id="es-fullname" class="form-control" type="text" required />
+        </div>
+        <div class="form-group">
+          <label for="es-email">Email *</label>
+          <input id="es-email" class="form-control" type="email" required />
+        </div>
+        <div class="form-group">
+          <label for="es-phone">Phone Number *</label>
+          <input id="es-phone" class="form-control" type="tel" maxlength="15" required />
+        </div>
+        <div class="form-group full">
+          <label for="es-address">Address</label>
+          <input id="es-address" class="form-control" type="text" />
+        </div>
+      </div>
+    </form>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('edit-student-modal')">Cancel</button>
+      <button class="btn btn-primary" id="save-edit-btn" onclick="saveStudentEdit()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Mobile sidebar overlay -->
+<div id="sidebar-overlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:199;backdrop-filter:blur(2px)"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════ */
+const API_BASE = 'http://127.0.0.1:8000';
+
+// Admin username — users with this username (or role='admin') get full admin features
+const ADMIN_USERNAMES = ['Raja', 'raja', 'admin'];
+
+let authToken = '';
+let currentUser = null;
+let isAdmin = false;  // derived from role or username
+let allStudents = [];
+let allOutpass  = [];
+let allPayments = [];
+let pendingDeleteUsername = '';
+let pendingUpdateHostelerId = '';
+let pendingUpdateStudentName = '';
+let currentPanel = 'warden'; // 'warden' or 'admin'
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const stored = localStorage.getItem('sh360_admin_auth');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // Accept both warden and admin roles
+      if (parsed.token && parsed.user && ['warden', 'admin'].includes(parsed.user.role)) {
+        authToken   = parsed.token;
+        currentUser = parsed.user;
+        bootDashboard();
+        return;
+      }
+    } catch {}
+  }
+  // Show login screen
+});
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH — LOGIN
+═══════════════════════════════════════════════════════════ */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('l-username').value.trim();
+  const password = document.getElementById('l-password').value;
+  const errEl    = document.getElementById('login-error');
+  const btn      = document.getElementById('login-submit-btn');
+
+  if (!username || !password) {
+    showLoginError('Please enter username and password.');
+    return;
+  }
+
+  btn.innerHTML = '<div class="spinner"></div> Signing in…';
+  btn.disabled  = true;
+  errEl.style.display = 'none';
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/auth/login/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+
+    if (data.success && data.user) {
+      // Accept warden OR admin roles
+      if (!['warden', 'admin'].includes(data.user.role)) {
+        showLoginError('Access denied — Only Warden or Admin can log in here.');
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+        btn.disabled  = false;
+        return;
+      }
+      authToken   = data.access;
+      currentUser = data.user;
+      localStorage.setItem('sh360_admin_auth', JSON.stringify({ token: data.access, user: data.user }));
+      bootDashboard();
+    } else {
+      showLoginError(data.error || 'Invalid credentials.');
+      btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+      btn.disabled  = false;
+    }
+  } catch (err) {
+    showLoginError('Cannot reach the server. Is the backend running?');
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+    btn.disabled  = false;
+  }
+});
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent    = msg;
+  el.style.display  = 'block';
+}
+
+function togglePass() {
+  const inp  = document.getElementById('l-password');
+  const icon = document.getElementById('eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'fa-solid fa-eye-slash';
+  } else {
+    inp.type = 'password';
+    icon.className = 'fa-solid fa-eye';
+  }
+}
+
+function bootDashboard() {
+  document.getElementById('login-screen').classList.add('hidden');
+  const name = currentUser.full_name || currentUser.username || 'User';
+
+  // Determine admin access: role='admin' OR username in ADMIN_USERNAMES
+  isAdmin = currentUser.role === 'admin' || ADMIN_USERNAMES.includes(currentUser.username);
+
+  // Update sidebar user info
+  document.getElementById('sidebar-admin-name').textContent = name;
+  document.getElementById('admin-avatar-initials').textContent = name[0].toUpperCase();
+
+  // Show correct role label + chip
+  const roleLabel = document.getElementById('sidebar-role-label');
+  const panelLabel = document.getElementById('sidebar-panel-label');
+
+  if (isAdmin) {
+    roleLabel.innerHTML = '<span class="role-chip admin">👑 Admin</span>';
+    panelLabel.textContent = 'Admin & Warden Dashboard';
+    document.body.classList.add('is-admin');
+  } else {
+    roleLabel.innerHTML = '<span class="role-chip warden">👮 Warden</span>';
+    panelLabel.textContent = 'Warden Dashboard';
+    document.body.classList.remove('is-admin');
+  }
+
+  // Update topbar breadcrumb
+  const crumbRole = isAdmin ? 'Admin' : 'Warden';
+  document.getElementById('topbar-breadcrumb').textContent = `${crumbRole} / Overview`;
+
+  loadDashboard();
+}
+
+function logout() {
+  localStorage.removeItem('sh360_admin_auth');
+  authToken   = '';
+  currentUser = null;
+  document.getElementById('login-screen').classList.remove('hidden');
+  toast('Logged out successfully.', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+const pageTitles = {
+  dashboard:    ['Dashboard', null],        // breadcrumb set dynamically
+  students:     ['Students', null],
+  'add-student':['Add Student', null],
+  rooms:        ['Rooms & Beds', null],
+  outpass:      ['Outpass Requests', null],
+  payments:     ['Payments', null],
+};
+
+/* Switch between Warden Panel and Admin Panel tabs in sidebar */
+function switchPanel(panel) {
+  currentPanel = panel;
+  document.getElementById('warden-panel').style.display = panel === 'warden' ? 'block' : 'none';
+  document.getElementById('admin-panel').style.display  = panel === 'admin'  ? 'block' : 'none';
+  document.getElementById('tab-warden').classList.toggle('active', panel === 'warden');
+  document.getElementById('tab-admin').classList.toggle('active',  panel === 'admin');
+
+  // When switching to admin panel, default to dashboard
+  showPage('dashboard', null);
+}
+
+function showPage(page, navBtn) {
+  // Hide all sections
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  // Deactivate all nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  // Show target
+  document.getElementById(`page-${page}`).classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+  // Titles
+  const roleLabel = isAdmin ? 'Admin' : 'Warden';
+  const labels = {
+    'dashboard':    ['Dashboard', `${roleLabel} / Overview`],
+    'students':     ['Students', `${roleLabel} / Student Records`],
+    'add-student':  ['Add Student', 'Admin / Create Student'],
+    'rooms':        ['Rooms & Beds', `${roleLabel} / Hostel Structure`],
+    'outpass':      ['Outpass Requests', `${roleLabel} / Operations`],
+    'payments':     ['Payment Records', `${roleLabel} / Finance`],
+  };
+  const [title, crumb] = labels[page] || [page, roleLabel];
+  document.getElementById('topbar-title').textContent     = title;
+  document.getElementById('topbar-breadcrumb').textContent = crumb;
+  // Load data
+  if (page === 'dashboard')    loadDashboard();
+  if (page === 'students')     loadStudents();
+  if (page === 'rooms')        loadRooms();
+  if (page === 'outpass')      loadOutpass();
+  if (page === 'payments')     loadPayments();
+  // Close mobile sidebar
+  if (window.innerWidth < 860) closeSidebar();
+}
+
+function refreshCurrentPage() {
+  const active = document.querySelector('.page-section.active');
+  if (!active) return;
+  const id = active.id.replace('page-', '');
+  showPage(id, document.getElementById(`nav-${id}`));
+}
+
+function toggleSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const isOpen   = sidebar.classList.contains('mobile-open');
+  sidebar.classList.toggle('mobile-open', !isOpen);
+  overlay.style.display = isOpen ? 'none' : 'block';
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   API HELPER
+═══════════════════════════════════════════════════════════ */
+async function api(url, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API_BASE}${url}`, opts);
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+function toast(msg, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  const icons = { success: '✅', error: '❌', warn: '⚠️' };
+  el.innerHTML = `<span class="toast-icon ${type}">${icons[type] || '✅'}</span><span>${msg}</span>`;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3800);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════════ */
+async function loadDashboard() {
+  await Promise.allSettled([
+    loadStudentStats(),
+    loadOutpassStats(),
+    loadPaymentStats(),
+    loadRecentStudents(),
+    loadOccupancyBars(),
+    loadActivityFeed(),
+  ]);
+}
+
+async function loadStudentStats() {
+  // Try warden/students endpoint first (works for both warden and admin)
+  const { ok: ok1, data: d1 } = await api('/api/warden/students/');
+  if (ok1 && d1.success) {
+    const count = d1.count || (d1.students || []).length;
+    document.getElementById('stat-students').textContent = count;
+    if (!allStudents.length && Array.isArray(d1.students)) {
+      allStudents = d1.students.map(s => ({ ...s, name: s.full_name || s.username || '—', mobile: s.phone_number || s.mobile || '' }));
+    }
+    return;
+  }
+  // Fallback to hostelers endpoint
+  const { ok, data } = await api('/api/hostelers/');
+  if (ok) {
+    const students = data.results || data;
+    document.getElementById('stat-students').textContent = Array.isArray(students) ? students.length : '—';
+    if (!allStudents.length && Array.isArray(students)) allStudents = students;
+  }
+}
+
+async function loadOutpassStats() {
+  const { ok, data } = await api('/api/outpass/');
+  if (ok) {
+    const requests = data.results || data;
+    const pending  = Array.isArray(requests) ? requests.filter(r => r.status === 'pending').length : 0;
+    document.getElementById('stat-outpass-pending').textContent = pending;
+    const badge = document.getElementById('outpass-badge');
+    if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
+    else badge.style.display = 'none';
+  }
+}
+
+async function loadPaymentStats() {
+  const { ok, data } = await api('/api/payments/');
+  if (ok) {
+    const payments = data.results || data;
+    const currentMonth = new Date().getMonth();
+    const currentYear  = new Date().getFullYear();
+    let revenue = 0;
+    if (Array.isArray(payments)) {
+      payments.forEach(p => {
+        const d = new Date(p.payment_date || p.created_at);
+        if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+          revenue += parseFloat(p.amount || 0);
+        }
+      });
+    }
+    document.getElementById('stat-revenue').textContent = revenue > 0 ? `₹${revenue.toLocaleString('en-IN')}` : '—';
+  }
+}
+
+async function loadRecentStudents() {
+  const { ok, data } = await api('/api/hostelers/');
+  const tbody = document.getElementById('recent-students-tbody');
+  if (!ok) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">Failed to load</td></tr>'; return; }
+  const students = (data.results || data).slice(0, 5);
+  if (!students.length) { tbody.innerHTML = '<tr><td colspan="3"><div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No students yet</p></div></td></tr>'; return; }
+  tbody.innerHTML = students.map(s => `
+    <tr>
+      <td>${s.name || '—'}</td>
+      <td><span class="td-id">${s.hosteler_id || s.id}</span></td>
+      <td>${s.room_number || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadOccupancyBars() {
+  const { ok, data } = await api('/api/hostelers/');
+  const container = document.getElementById('occupancy-bars');
+  if (!ok) { container.innerHTML = '<div style="color:var(--text-muted)">Failed to load occupancy.</div>'; return; }
+  const students = data.results || data;
+  const totalBeds = 2 * 10 * 3; // 60
+  const occupied  = Array.isArray(students) ? students.length : 0;
+  const free      = totalBeds - occupied;
+  document.getElementById('stat-beds-free').textContent = free >= 0 ? free : '—';
+
+  // Per-floor occupancy
+  const floorStats = { 1: 0, 2: 0 };
+  if (Array.isArray(students)) {
+    students.forEach(s => {
+      const hid = s.hosteler_id || '';
+      const year = new Date().getFullYear().toString();
+      const yearIdx = hid.indexOf(year.slice(-4));
+      if (yearIdx >= 0) {
+        const after = hid.slice(yearIdx + 4);
+        const floor = parseInt(after[0]);
+        if (floor === 1 || floor === 2) floorStats[floor]++;
+      }
+    });
+  }
+
+  container.innerHTML = [1, 2].map(f => {
+    const occ  = floorStats[f];
+    const total = 10 * 3; // 30 beds per floor
+    const pct  = Math.round((occ / total) * 100);
+    const color = pct > 80 ? 'var(--danger)' : pct > 50 ? 'var(--warning)' : 'var(--accent2)';
+    return `
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;font-weight:600">
+          <span>Floor ${f}</span>
+          <span style="color:${color}">${occ}/${total} beds used (${pct}%)</span>
+        </div>
+        <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.8s ease"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadActivityFeed() {
+  const feed = document.getElementById('activity-feed');
+  // Pull from localStorage pseudo-log or show defaults
+  const events = JSON.parse(localStorage.getItem('sh360_activity') || '[]');
+  if (!events.length) {
+    feed.innerHTML = `
+      <div class="activity-item">
+        <div class="activity-dot green"></div>
+        <div class="activity-text">Dashboard loaded successfully.</div>
+        <div class="activity-time">Just now</div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div class="activity-text">Admin logged in.</div>
+        <div class="activity-time">—</div>
+      </div>
+    `;
+    return;
+  }
+  feed.innerHTML = events.slice(0, 8).map(ev => `
+    <div class="activity-item">
+      <div class="activity-dot ${ev.color || ''}"></div>
+      <div class="activity-text">${ev.msg}</div>
+      <div class="activity-time">${ev.time || ''}</div>
+    </div>
+  `).join('');
+}
+
+function logActivity(msg, color = '') {
+  const events = JSON.parse(localStorage.getItem('sh360_activity') || '[]');
+  events.unshift({ msg, color, time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) });
+  localStorage.setItem('sh360_activity', JSON.stringify(events.slice(0, 20)));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STUDENTS
+═══════════════════════════════════════════════════════════ */
+async function loadStudents() {
+  const tbody = document.getElementById('students-tbody');
+  tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr>`;
+
+  // Use the warden/students endpoint (works for both warden and admin)
+  let students = [];
+  const { ok: ok1, data: d1 } = await api('/api/warden/students/');
+  if (ok1 && d1.success) {
+    students = d1.students || [];
+  } else {
+    // Fallback to hostelers endpoint
+    const { ok: ok2, data: d2 } = await api('/api/hostelers/');
+    if (ok2) students = d2.results || d2;
+  }
+
+  if (!Array.isArray(students)) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-exclamation-circle"></i><p>Failed to load students.</p></div></td></tr>`;
+    return;
+  }
+  // Map User model fields to display-friendly format
+  allStudents = students.map(s => ({
+    ...s,
+    name: s.full_name || s.username || '—',
+    email: s.email || '—',
+    mobile: s.phone_number || s.mobile || '—',
+    hosteler_id: s.hosteler_id || '',
+    room_number: s.room_number || null,
+    address: s.address || '',
+  }));
+  renderStudentsTable(allStudents);
+  document.getElementById('students-count-label').textContent = `${allStudents.length} student${allStudents.length !== 1 ? 's' : ''} registered`;
+}
+
+function renderStudentsTable(students) {
+  const tbody = document.getElementById('students-tbody');
+  if (!students.length) {
+    const addBtn = isAdmin
+      ? `<button class="btn btn-primary btn-sm" onclick="showPage('add-student', document.getElementById('nav-add-student'))"><i class="fa-solid fa-plus"></i> Add First Student</button>`
+      : '';
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-users-slash"></i><p>No students found.</p>${addBtn}</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = students.map((s, i) => {
+    const hostId = s.hosteler_id || s.id || '—';
+    const name   = s.name || s.full_name || '—';
+    const email  = s.email  || '—';
+    const phone  = s.mobile || s.phone_number || '—';
+    const room   = s.room_number || '—';
+    // Admin-only action buttons
+    const adminActions = isAdmin
+      ? `<button class="btn btn-ghost btn-sm btn-icon" title="Update Room" onclick="openUpdateRoomModal('${hostId}', '${name.replace(/'/g, "'")}')">
+           <i class="fa-solid fa-arrows-turn-right"></i>
+         </button>
+         <button class="btn btn-danger btn-sm btn-icon" title="Delete Student" onclick="openDeleteModal('${hostId}', '${name.replace(/'/g, "'")}')">
+           <i class="fa-solid fa-trash"></i>
+         </button>`
+      : '';
+    return `
+      <tr id="student-row-${hostId}">
+        <td style="color:var(--text-muted)">${i + 1}</td>
+        <td>
+          <div style="font-weight:600">${name}</div>
+        </td>
+        <td><span class="td-id">${hostId}</span></td>
+        <td>${email}</td>
+        <td>${phone}</td>
+        <td>${room !== '—' ? `<span class="badge badge-green"><i class="fa-solid fa-bed"></i>${room}</span>` : '<span class="badge badge-grey">Unassigned</span>'}</td>
+        <td><span class="badge badge-green"><i class="fa-solid fa-circle" style="font-size:7px"></i> Active</span></td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:nowrap">
+            <button class="btn btn-ghost btn-sm btn-icon" title="View Profile" onclick="viewStudentDetail('${hostId}')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            ${adminActions}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterStudents() {
+  const q = document.getElementById('student-search').value.toLowerCase();
+  renderStudentsTable(
+    allStudents.filter(s =>
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.hosteler_id || '').toLowerCase().includes(q) ||
+      (s.email || '').toLowerCase().includes(q)
+    )
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADD STUDENT
+═══════════════════════════════════════════════════════════ */
+function updateRoomPreview() {
+  const f = document.getElementById('as-floor').value;
+  const r = document.getElementById('as-room').value;
+  const b = document.getElementById('as-bed').value;
+  const wrap = document.getElementById('hosteler-preview-wrap');
+  if (f && r && b) {
+    const year = new Date().getFullYear();
+    const id   = `H${year}${f}${r.padStart(2,'0')}${b}`;
+    document.getElementById('hosteler-id-preview').textContent = id;
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+document.getElementById('add-student-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('add-student-submit-btn');
+
+  const username   = document.getElementById('as-username').value.trim();
+  const password   = document.getElementById('as-password').value;
+  const full_name  = document.getElementById('as-fullname').value.trim();
+  const email      = document.getElementById('as-email').value.trim();
+  const phone      = document.getElementById('as-phone').value.trim();
+  const address    = document.getElementById('as-address').value.trim();
+  const floor      = parseInt(document.getElementById('as-floor').value);
+  const room       = parseInt(document.getElementById('as-room').value);
+  const bed        = parseInt(document.getElementById('as-bed').value);
+
+  if (!username || !password || !full_name || !email || !phone || !floor || !room || !bed) {
+    toast('Please fill all required fields.', 'warn');
+    return;
+  }
+
+  btn.innerHTML = '<div class="spinner"></div> Creating…';
+  btn.disabled  = true;
+
+  const { ok, data } = await api('/api/admin/add-student/', 'POST', {
+    username, password, full_name, email, phone_number: phone, address, floor, room, bed,
+  });
+
+  btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Student';
+  btn.disabled  = false;
+
+  if (ok && data.success) {
+    const user = data.user;
+    // Show success card
+    document.getElementById('add-student-success').style.display = 'block';
+    document.getElementById('success-username').textContent   = user.username;
+    document.getElementById('success-hosteler-id').textContent = user.hosteler_id;
+    document.getElementById('success-fullname').textContent   = user.full_name;
+    document.getElementById('success-room').textContent       = `Floor ${floor}, Room ${room}, Bed ${bed}`;
+    // Scroll to success
+    document.getElementById('add-student-success').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Reset form
+    document.getElementById('add-student-form').reset();
+    document.getElementById('hosteler-preview-wrap').style.display = 'none';
+    toast(`Student "${full_name}" created! ID: ${user.hosteler_id}`, 'success');
+    logActivity(`Created student: ${full_name} (${user.hosteler_id})`, 'green');
+  } else {
+    const errMsg = data?.errors ? JSON.stringify(data.errors) : (data?.error || 'Failed to create student.');
+    toast(errMsg, 'error');
+  }
+});
+
+function resetAddStudentForm() {
+  document.getElementById('add-student-form').reset();
+  document.getElementById('hosteler-preview-wrap').style.display = 'none';
+  document.getElementById('add-student-success').style.display   = 'none';
+}
+
+function addAnother() {
+  document.getElementById('add-student-success').style.display = 'none';
+  document.getElementById('as-username').focus();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DELETE STUDENT  (admin only)
+═══════════════════════════════════════════════════════════ */
+function openDeleteModal(hosteler_id, name) {
+  if (!isAdmin) { toast('Only admins can delete students.', 'error'); return; }
+  pendingDeleteUsername = hosteler_id; // We'll delete by hosteler_id
+  document.getElementById('delete-confirm-info').innerHTML = `
+    <strong>${name}</strong><br/>
+    Hosteler ID: <span style="font-family:monospace;color:#a78bfa">${hosteler_id}</span>
+  `;
+  openModal('delete-modal');
+}
+
+async function confirmDeleteStudent() {
+  const btn = document.getElementById('delete-confirm-btn');
+  btn.innerHTML = '<div class="spinner"></div> Deleting…';
+  btn.disabled  = true;
+
+  const { ok, data } = await api('/api/admin/remove-student/', 'DELETE', {
+    hosteler_id: pendingDeleteUsername,
+  });
+
+  btn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete Permanently';
+  btn.disabled  = false;
+
+  if (ok && data.success) {
+    closeModal('delete-modal');
+    toast('Student deleted successfully.', 'success');
+    logActivity(`Deleted student: ${pendingDeleteUsername}`, 'red');
+    loadStudents();
+  } else {
+    toast(data.error || 'Failed to delete student.', 'error');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UPDATE ROOM  (admin only)
+═══════════════════════════════════════════════════════════ */
+function openUpdateRoomModal(hosteler_id, name) {
+  if (!isAdmin) { toast('Only admins can change room assignments.', 'error'); return; }
+  pendingUpdateHostelerId  = hosteler_id;
+  pendingUpdateStudentName = name;
+  document.getElementById('update-room-student-name').textContent  = name + ' — ';
+  document.getElementById('update-room-current-id').textContent    = hosteler_id;
+  document.getElementById('update-room-form').reset();
+  document.getElementById('ur-preview-wrap').style.display = 'none';
+  openModal('update-room-modal');
+}
+
+function updateRoomModalPreview() {
+  const f = document.getElementById('ur-floor').value;
+  const r = document.getElementById('ur-room').value;
+  const b = document.getElementById('ur-bed').value;
+  const wrap = document.getElementById('ur-preview-wrap');
+  if (f && r && b) {
+    const year = new Date().getFullYear();
+    document.getElementById('ur-id-preview').textContent = `H${year}${f}${r.padStart(2,'0')}${b}`;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function submitUpdateRoom() {
+  const floor = parseInt(document.getElementById('ur-floor').value);
+  const room  = parseInt(document.getElementById('ur-room').value);
+  const bed   = parseInt(document.getElementById('ur-bed').value);
+
+  if (!floor || !room || !bed) { toast('Select floor, room and bed.', 'warn'); return; }
+
+  const btn = document.getElementById('update-room-btn');
+  btn.innerHTML = '<div class="spinner"></div> Moving…';
+  btn.disabled  = true;
+
+  const { ok, data } = await api('/api/admin/update-room/', 'PUT', {
+    hosteler_id: pendingUpdateHostelerId,
+    floor, room, bed,
+  });
+
+  btn.innerHTML = '<i class="fa-solid fa-right-left"></i> Move Student';
+  btn.disabled  = false;
+
+  if (ok && data.success) {
+    closeModal('update-room-modal');
+    toast(`Room updated → ${data.new_hosteler_id}`, 'success');
+    logActivity(`Moved ${pendingUpdateStudentName}: ${data.old_hosteler_id} → ${data.new_hosteler_id}`, '');
+    loadStudents();
+  } else {
+    toast(data.error || 'Room update failed.', 'error');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROOMS
+═══════════════════════════════════════════════════════════ */
+async function loadRooms() {
+  const container = document.getElementById('rooms-container');
+  container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading…</p></div>';
+
+  // Fetch students to build occupancy map
+  const { ok, data } = await api('/api/hostelers/');
+  const students = ok ? (data.results || data) : [];
+
+  // Build map: hosteler_id → student
+  // hosteler_id format: H<year><floor><room><bed>
+  const year = new Date().getFullYear().toString();
+  const occupancy = {}; // key: `${floor}-${room}-${bed}` → student name
+
+  if (Array.isArray(students)) {
+    students.forEach(s => {
+      const hid = s.hosteler_id || '';
+      const idx = hid.indexOf(year);
+      if (idx >= 0) {
+        const rest = hid.slice(idx + 4);
+        if (rest.length >= 4) {
+          const fl  = rest[0];
+          const rm  = parseInt(rest.slice(1, 3));
+          const bed = rest[3];
+          occupancy[`${fl}-${rm}-${bed}`] = s.name || 'Student';
+        }
+      }
+    });
+  }
+
+  let totalFree = 0, totalOccupied = 0;
+  let html = '';
+
+  for (let floor = 1; floor <= 2; floor++) {
+    html += `<div class="floor-label"><i class="fa-solid fa-layer-group"></i> Floor ${floor}</div>`;
+    html += '<div class="rooms-grid">';
+    for (let room = 1; room <= 10; room++) {
+      const roomNum = String(room).padStart(2, '0');
+      html += `
+        <div class="room-card">
+          <div class="room-header">
+            <span class="room-num">F${floor}R${roomNum}</span>
+            <span class="badge badge-grey" style="font-size:10px">3 beds</span>
+          </div>
+          <div class="beds-list">
+      `;
+      for (let bed = 1; bed <= 3; bed++) {
+        const key  = `${floor}-${room}-${bed}`;
+        const who  = occupancy[key];
+        if (who) {
+          totalOccupied++;
+          html += `
+            <div class="bed-slot occupied">
+              <div class="bed-label"><i class="fa-solid fa-bed"></i> Bed ${bed}</div>
+              <span class="bed-student">${who}</span>
+            </div>
+          `;
+        } else {
+          totalFree++;
+          html += `
+            <div class="bed-slot free">
+              <div class="bed-label"><i class="fa-solid fa-bed"></i> Bed ${bed}</div>
+              <span style="font-size:11px;opacity:0.7">Available</span>
+            </div>
+          `;
+        }
+      }
+      html += `</div></div>`;
+    }
+    html += '</div><div style="height:12px"></div>';
+  }
+
+  container.innerHTML = html;
+  document.getElementById('rooms-summary').innerHTML =
+    `<span class="badge badge-green"><i class="fa-solid fa-check-circle"></i> ${totalFree} Free</span>
+     &nbsp;
+     <span class="badge badge-red"><i class="fa-solid fa-xmark-circle"></i> ${totalOccupied} Occupied</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   OUTPASS
+═══════════════════════════════════════════════════════════ */
+async function loadOutpass() {
+  const tbody = document.getElementById('outpass-tbody');
+  tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div></td></tr>`;
+
+  const { ok, data } = await api('/api/outpass/');
+  if (!ok) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-exclamation-circle"></i><p>Failed to load outpasses.</p></div></td></tr>`;
+    return;
+  }
+  allOutpass = data.results || data;
+  renderOutpassTable(allOutpass);
+}
+
+function renderOutpassTable(requests) {
+  const tbody = document.getElementById('outpass-tbody');
+  if (!Array.isArray(requests) || !requests.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fa-solid fa-inbox"></i><p>No outpass requests found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = requests.map(r => {
+    const status = r.status || 'pending';
+    const badgeClass = status === 'approved' ? 'badge-green' : status === 'rejected' ? 'badge-red' : 'badge-yellow';
+    const actions = status === 'pending'
+      ? `<button class="btn btn-success btn-sm" onclick="approveOutpass(${r.id})"><i class="fa-solid fa-check"></i></button>
+         <button class="btn btn-danger btn-sm" onclick="rejectOutpass(${r.id})"><i class="fa-solid fa-xmark"></i></button>`
+      : `<span style="color:var(--text-muted);font-size:12px">No action</span>`;
+    return `
+      <tr>
+        <td>${r.student_name || r.hosteler?.name || '—'}</td>
+        <td><span class="td-id">${r.hosteler_id || r.hosteler?.hosteler_id || '—'}</span></td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.reason || '—'}</td>
+        <td style="font-size:12px">${r.exit_date || r.exit_time || '—'}</td>
+        <td style="font-size:12px">${r.return_date || r.return_time || '—'}</td>
+        <td><span class="badge ${badgeClass}" style="text-transform:capitalize">${status}</span></td>
+        <td><div style="display:flex;gap:6px">${actions}</div></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterOutpass() {
+  const filter = document.getElementById('outpass-filter').value;
+  renderOutpassTable(filter ? allOutpass.filter(r => r.status === filter) : allOutpass);
+}
+
+async function approveOutpass(id) {
+  const { ok, data } = await api(`/api/outpass/${id}/approve/`, 'POST');
+  if (ok) { toast('Outpass approved!', 'success'); logActivity(`Outpass #${id} approved`, 'green'); loadOutpass(); }
+  else toast(data.error || 'Failed to approve.', 'error');
+}
+
+async function rejectOutpass(id) {
+  const { ok, data } = await api(`/api/outpass/${id}/reject/`, 'POST');
+  if (ok) { toast('Outpass rejected.', 'warn'); logActivity(`Outpass #${id} rejected`, 'red'); loadOutpass(); }
+  else toast(data.error || 'Failed to reject.', 'error');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAYMENTS
+═══════════════════════════════════════════════════════════ */
+async function loadPayments() {
+  const tbody = document.getElementById('payments-tbody');
+  tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i></div></td></tr>`;
+
+  const { ok, data } = await api('/api/payments/');
+  if (!ok) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-exclamation-circle"></i><p>Failed to load payments.</p></div></td></tr>`;
+    return;
+  }
+  allPayments = data.results || data;
+  renderPaymentsTable(allPayments);
+}
+
+function renderPaymentsTable(payments) {
+  const tbody = document.getElementById('payments-tbody');
+  if (!Array.isArray(payments) || !payments.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fa-solid fa-wallet"></i><p>No payment records.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = payments.map(p => {
+    const isPaid = p.status === 'paid' || p.payment_status === 'paid';
+    return `
+      <tr>
+        <td>${p.student_name || p.hosteler_name || '—'}</td>
+        <td><span class="td-id">${p.hosteler_id || '—'}</span></td>
+        <td style="font-weight:700">₹${parseFloat(p.amount || 0).toLocaleString('en-IN')}</td>
+        <td>${p.payment_type || p.fee_type || '—'}</td>
+        <td style="font-size:12px">${p.payment_date || p.created_at?.slice(0,10) || '—'}</td>
+        <td><span class="badge ${isPaid ? 'badge-green' : 'badge-yellow'}">${isPaid ? 'Paid' : 'Pending'}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterPayments() {
+  const q = document.getElementById('payment-search').value.toLowerCase();
+  renderPaymentsTable(
+    allPayments.filter(p =>
+      (p.student_name || p.hosteler_name || '').toLowerCase().includes(q) ||
+      (p.hosteler_id || '').toLowerCase().includes(q)
+    )
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STUDENT DETAIL / EDIT
+═══════════════════════════════════════════════════════════ */
+let viewingStudent = null;
+
+function viewStudentDetail(hosteler_id) {
+  const s = allStudents.find(x => (x.hosteler_id || x.id) === hosteler_id);
+  if (!s) { toast('Student not found.', 'error'); return; }
+  viewingStudent = s;
+
+  const hid  = s.hosteler_id || s.id || '—';
+  const year = new Date().getFullYear().toString();
+  let floorInfo = '—';
+  const idx = hid.indexOf(year);
+  if (idx >= 0) {
+    const rest = hid.slice(idx + 4);
+    if (rest.length >= 4) {
+      floorInfo = `Floor ${rest[0]}, Room ${parseInt(rest.slice(1,3))}, Bed ${rest[3]}`;
+    }
+  }
+  const regDate = s.registration_date || s.created_at?.slice(0,10) || '—';
+
+  const body = document.getElementById('student-detail-body');
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a78bfa);display:grid;place-items:center;font-size:22px;font-weight:800;color:white;flex-shrink:0">
+        ${(s.name || '?')[0].toUpperCase()}
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:700">${s.name || '—'}</div>
+        <div style="font-size:12px;color:var(--text-muted)">Registered: ${regDate}</div>
+      </div>
+      <span class="badge badge-green" style="margin-left:auto"><i class="fa-solid fa-circle" style="font-size:7px"></i> Active</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Hosteler ID</div>
+        <div style="font-family:monospace;color:#a78bfa;font-weight:700;font-size:15px">${hid}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Room</div>
+        <div style="font-weight:600">${s.room_number || floorInfo}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Email</div>
+        <div>${s.email || '—'}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Phone</div>
+        <div>${s.mobile || s.phone_number || '—'}</div>
+      </div>
+      <div style="grid-column:1/-1">
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Address</div>
+        <div>${s.address || '—'}</div>
+      </div>
+      ${s.college ? `<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">College</div><div>${s.college}</div></div>` : ''}
+      ${s.course ? `<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Course</div><div>${s.course}</div></div>` : ''}
+      ${s.father_name ? `<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Father's Name</div><div>${s.father_name}</div></div>` : ''}
+      ${s.emergency_phone ? `<div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Emergency Contact</div><div>${s.emergency_name || ''} — ${s.emergency_phone}</div></div>` : ''}
+    </div>
+  `;
+  openModal('student-detail-modal');
+}
+
+function toggleStudentEdit() {
+  if (!viewingStudent) return;
+  closeModal('student-detail-modal');
+  const s = viewingStudent;
+  document.getElementById('es-username').value     = s.name || '—';
+  document.getElementById('es-hosteler-id').value   = s.hosteler_id || s.id || '—';
+  document.getElementById('es-fullname').value      = s.name || '';
+  document.getElementById('es-email').value         = s.email || '';
+  document.getElementById('es-phone').value         = s.mobile || '';
+  document.getElementById('es-address').value        = s.address || '';
+  openModal('edit-student-modal');
+}
+
+async function saveStudentEdit() {
+  if (!viewingStudent) return;
+  const hid      = viewingStudent.hosteler_id || viewingStudent.id;
+  const recordId = viewingStudent.record_id || viewingStudent.pk;
+  const name     = document.getElementById('es-fullname').value.trim();
+  const email    = document.getElementById('es-email').value.trim();
+  const phone    = document.getElementById('es-phone').value.trim();
+  const address  = document.getElementById('es-address').value.trim();
+
+  if (!name || !email) { toast('Name and email are required.', 'warn'); return; }
+
+  const btn = document.getElementById('save-edit-btn');
+  btn.innerHTML = '<div class="spinner"></div> Saving…';
+  btn.disabled  = true;
+
+  // Try PATCH to hostelers endpoint
+  const patchId = recordId || hid;
+  const { ok, data } = await api(`/api/hostelers/${patchId}/`, 'PATCH', {
+    name, email, mobile: phone, address,
+  });
+
+  btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Changes';
+  btn.disabled  = false;
+
+  if (ok) {
+    closeModal('edit-student-modal');
+    toast(`Updated profile for ${name}.`, 'success');
+    logActivity(`Edited student: ${name} (${hid})`, '');
+    loadStudents();
+  } else {
+    toast(data?.detail || 'Failed to save changes.', 'error');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT STUDENTS CSV
+═══════════════════════════════════════════════════════════ */
+function exportStudentsCSV() {
+  if (!allStudents.length) { toast('No students to export.', 'warn'); return; }
+
+  const headers = ['#', 'Hosteler ID', 'Name', 'Email', 'Phone', 'Room', 'Address', 'College', 'Registered'];
+  const rows = allStudents.map((s, i) => [
+    i + 1,
+    s.hosteler_id || s.id || '',
+    s.name || '',
+    s.email || '',
+    s.mobile || '',
+    s.room_number || '',
+    (s.address || '').replace(/[\n\r,]/g, ' '),
+    s.college || '',
+    s.registration_date || '',
+  ]);
+
+  let csv = headers.join(',') + '\n';
+  rows.forEach(r => {
+    csv += r.map(v => `"${v}"`).join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href        = url;
+  a.download    = `students_export_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded.', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DELETE ROOM (Admin)
+═══════════════════════════════════════════════════════════ */
+async function deleteRoom(roomId) {
+  if (!confirm(`Delete room ID ${roomId}? This cannot be undone.`)) return;
+  const { ok, data } = await api(`/api/rooms/${roomId}/`, 'DELETE');
+  if (ok) {
+    toast('Room deleted.', 'success');
+    logActivity(`Deleted room #${roomId}`, 'red');
+    loadRooms();
+  } else {
+    toast(data?.detail || 'Failed to delete room.', 'error');
+  }
+}
+</script>
+</body>
+</html>

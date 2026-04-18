@@ -1,0 +1,83 @@
+[
+  {
+    "id": "S001",
+    "name": "Alice Kumar",
+    "class": "FY BSc",
+    "gender": "female",
+    "place": "Chennai",
+    "email": "alice@example.com",
+    "phone": "9876543210",
+    "roomAllocated": null
+  },
+  {
+    "id": "S002",
+    "name": "Bob Singh",
+    "class": "SY BCom",
+    "gender": "male",
+    "place": "Mumbai",
+    "email": "bob@example.com",
+    "phone": "9876543211",
+    "roomAllocated": null
+  },
+  {
+    "id": "S003",
+    "name": "Charlie Patel",
+    "class": "TY BA",
+    "gender": "male",
+    "place": "Delhi",
+    "email": "charlie@example.com",
+    "phone": "9876543212",
+    "roomAllocated": null
+  },
+  {
+    "id": "S004",
+    "name": "Diana Sharma",
+    "class": "FY BSc",
+    "gender": "female",
+    "place": "Bangalore",
+    "email": "diana@example.com",
+    "phone": "9876543213",
+    "roomAllocated": null
+  },
+  {
+    "id": "S005",
+    "name": "Eve Reddy",
+    "class": "SY BCom",
+    "gender": "female",
+    "place": "Hyderabad",
+    "email": "eve@example.com",
+    "phone": "9876543214",
+    "roomAllocated": null
+  },
+  {
+    "id": "S006",
+    "name": "Frank Mehta",
+    "class": "TY BCA",
+    "gender": "male",
+    "place": "Pune",
+    "email": "frank@example.com",
+    "phone": "9876543215",
+    "roomAllocated": null
+  },
+  {
+    "id": "S007",
+    "name": "Grace Iyer",
+    "class": "FY BSc",
+    "gender": "female",
+    "place": "Kolkata",
+    "email": "grace@example.com",
+    "phone": "9876543216",
+    "roomAllocated": null
+  },
+  {
+    "id": "S008",
+    "name": "Henry Nair",
+    "class": "SY BA",
+    "gender": "male",
+    "place": "Kochi",
+    "email": "henry@example.com",
+    "phone": "9876543217",
+    "roomAllocated": null
+  }
+]
+
